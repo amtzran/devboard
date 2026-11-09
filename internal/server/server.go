@@ -34,3 +34,13 @@ func New(addr string) *Server {
 func (s *Server) Start() error {
 	return s.httpServer.ListenAndServe()
 }
+
+// RegisterRoute registers handler for requests matching pattern.
+func (s *Server) RegisterRoute(pattern string, handler http.Handler) {
+	s.mux.Handle(pattern, handler)
+}
+
+// ServeHTTP implements http.Handler.
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.mux.ServeHTTP(w, r)
+}
