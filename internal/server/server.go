@@ -12,6 +12,9 @@ type Server struct {
 	mux        *http.ServeMux
 }
 
+// Middleware wraps an http.Handler with additional behavior.
+type Middleware func(http.Handler) http.Handler
+
 // New creates a Server listening on addr.
 func New(addr string) *Server {
 	mux := http.NewServeMux()
@@ -43,4 +46,11 @@ func (s *Server) RegisterRoute(pattern string, handler http.Handler) {
 // ServeHTTP implements http.Handler.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
+}
+
+// Use wraps the server's handler with m. Middlewares run in reverse
+// order of registration the last one added handles the request first.
+// It must be called before Start.
+func (s *Server) Use(m Middleware) {
+	s.httpServer.Handler = m(s.httpServer.Handler)
 }
